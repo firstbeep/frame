@@ -2,7 +2,7 @@
 
 FRAME is a local desktop web app for filmmakers, set designers, and solo creators. Describe an action line or physical set, choose a camera distance and lighting direction, and develop a monochrome storyboard panel on your own computer.
 
-**QVAC SDK: `@qvac/sdk` exactly `0.19.1`.** No API keys, cloud inference, remote fonts, or analytics. The interface opens in your browser; a Node.js server bound to `127.0.0.1` runs the native QVAC worker locally. It is not an Electron installer.
+## QVAC SDK: `@qvac/sdk` exactly `0.19.1`.** No API keys, cloud inference, remote fonts, or analytics. The interface opens in your browser; a Node.js server bound to `127.0.0.1` runs the native QVAC worker locally. It is not an Electron installer.
 
 ![FRAME running with a real locally generated image](docs/evidence/studio.png)
 
@@ -21,6 +21,20 @@ FRAME is a local desktop web app for filmmakers, set designers, and solo creator
 
 Scene parsing is deterministic: the app normalizes whitespace and combines the description with the chosen camera and lighting directions. QVAC performs image generation and upscaling. A local PNG pass ensures genuinely monochrome exports. A prompt guides composition; it does not guarantee exact object placement or continuity between shots.
 
+## QVAC integration
+
+| SDK function | How FRAME uses it |
+| --- | --- |
+| `loadModel({ modelSrc, modelType, modelConfig })` | Loads a verified local SD 2.1 model or a standalone ESRGAN model using `sdcpp-generation`. |
+| `diffusion({ modelId, prompt, ... })` | Produces the original panel; `progressStream` reports real sampling steps, `outputs` returns PNG bytes. |
+| `upscale({ modelId, image, repeats: 1 })` | Performs one native 4× ESRGAN pass on the original panel. |
+| `unloadModel({ modelId, clearStorage: false })` | Releases model memory in a `finally` block. |
+| `heartbeat()` / `close()` | Verify the worker and clean up RPC resources. |
+
+Implementation: [src/render.js](src/render.js). All these functions were checked against the installed **0.19.1** package and exercised by the real smoke test. `@qvac/inference` is supplied by the SDK's locked dependency tree; the custom worker uses its plugin registration API. No changes to `node_modules` are needed.
+
+The SDK returns the final image, not intermediate preview frames. The progress bar reports actual denoising steps; a short reveal animation runs only after the genuine output arrives. Rendering is not guaranteed to finish in 15 seconds. Diffusion and upscaling timings depend on device, resolution, and quality.
+
 ## Requirements
 
 - Node.js **22.17+** and npm **10.9+**; Node 24 LTS is recommended.
@@ -36,6 +50,8 @@ See [QVAC system requirements](https://docs.qvac.tether.io/system-requirements/)
 Download this repository as a ZIP and extract it, or clone its public GitHub URL. Open a terminal in the project directory containing `package.json`.
 
 ```sh
+git clone https://github.com/firstbeep/frame.git
+cd frame
 node --version
 npm --version
 npm ci
@@ -63,19 +79,6 @@ Open **http://127.0.0.1:3210**. Keep the terminal running.
 
 Press Ctrl+C in the server terminal to stop. Use **Stop render** to terminate only the active job. Completed panels persist in `outputs/`; thumbnails reload at startup. The app allows one inference job at a time to avoid competing for GPU memory. Upscaling an already upscaled panel is intentionally disabled.
 
-## QVAC integration
-
-| SDK function | How FRAME uses it |
-| --- | --- |
-| `loadModel({ modelSrc, modelType, modelConfig })` | Loads a verified local SD 2.1 model or a standalone ESRGAN model using `sdcpp-generation`. |
-| `diffusion({ modelId, prompt, ... })` | Produces the original panel; `progressStream` reports real sampling steps, `outputs` returns PNG bytes. |
-| `upscale({ modelId, image, repeats: 1 })` | Performs one native 4× ESRGAN pass on the original panel. |
-| `unloadModel({ modelId, clearStorage: false })` | Releases model memory in a `finally` block. |
-| `heartbeat()` / `close()` | Verify the worker and clean up RPC resources. |
-
-Implementation: [src/render.js](src/render.js). All these functions were checked against the installed **0.19.1** package and exercised by the real smoke test. `@qvac/inference` is supplied by the SDK's locked dependency tree; the custom worker uses its plugin registration API. No changes to `node_modules` are needed.
-
-The SDK returns the final image, not intermediate preview frames. The progress bar reports actual denoising steps; a short reveal animation runs only after the genuine output arrives. Rendering is not guaranteed to finish in 15 seconds. Diffusion and upscaling timings depend on device, resolution, and quality.
 
 ## Offline use and privacy
 
@@ -165,6 +168,5 @@ npm start
 FRAME_DEVICE=cpu npm start
 ```
 
-## Bounty submission
-
-This repository contains an original implementation, exact QVAC dependency, real SDK calls, MIT license, reviewer instructions, tests, and a screenshot of real output. Public hosting and a social post are separate submission steps. Follow [SUBMISSION.md](SUBMISSION.md) for the checklist and a ready-to-edit X post. Bounty approval is decided by the organizer and is not guaranteed by this project or SDK version.
+## License
+[MIT](https://github.com/firstbeep/frame?tab=MIT-1-ov-file) 
