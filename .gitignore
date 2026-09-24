@@ -6,3 +6,4 @@ artifacts/
 .env
 test-results/
 playwright-report/
+SUBMISSION.md

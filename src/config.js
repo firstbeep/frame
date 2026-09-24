@@ -5,10 +5,10 @@ export const MODEL_DIR = path.join(ROOT, '.cache', 'models');
 export const OUTPUT_DIR = path.join(ROOT, 'outputs');
 export const MODELS = {
   diffusion: {
-    file: 'stable-diffusion-v2-1-Q8_0.gguf',
-    url: 'https://huggingface.co/gpustack/stable-diffusion-v2-1-GGUF/resolve/12ddc22724f6da35f0b6006e459fae66eaf56931/stable-diffusion-v2-1-Q8_0.gguf',
-    bytes: 2322705024,
-    sha256: '7b73fa47b4d1401bdf3a0898827fac94bced6633bf64ef7fe55492b6115cc74b'
+    file: 'stable-diffusion-xl-base-1.0-Q4_0.gguf',
+    url: 'https://huggingface.co/gpustack/stable-diffusion-xl-base-1.0-GGUF/resolve/5f58340891db3ef66a79758c2dcddad92b1de169/stable-diffusion-xl-base-1.0-Q4_0.gguf',
+    bytes: 3940010720,
+    sha256: '4ab9818c9b3428eca96834c51fe294885608480991463f55bd9be53c822567c3'
   },
   upscale: {
     file: 'RealESRGAN_x4plus.pth',

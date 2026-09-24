@@ -14,11 +14,13 @@ async function checksum(file) {
 await mkdir(MODEL_DIR, { recursive: true });
 try {
   for (const model of Object.values(MODELS)) {
+    for (let attempt = 1; attempt <= 4; attempt++) {
+    try {
     const destination = path.join(MODEL_DIR, model.file);
     if (await stat(destination).catch(() => null)) {
       if (await checksum(destination) === model.sha256) {
         console.log(`Verified cached ${model.file}`);
-        continue;
+        break;
       }
       throw new Error(`${destination} has an incorrect checksum. Move it aside and rerun setup.`);
     }
@@ -47,6 +49,13 @@ try {
     }
     await rename(partial, destination);
     console.log(`SHA-256 verified: ${model.file}`);
+    break;
+    } catch (error) {
+      if (attempt === 4) throw error;
+      console.warn(`Download/check attempt ${attempt} failed: ${error.message}. Resuming in ${attempt * 2}s…`);
+      await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+    }
+    }
   }
   console.log('Models ready. Rendering now uses local file paths only. Run npm run smoke, then npm start.');
 } catch (error) {

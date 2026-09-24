@@ -59,7 +59,8 @@ export function createStudioServer() {
       const url = new URL(req.url, `http://${host}`);
       if (req.method === 'GET' && url.pathname === '/api/status') {
         let modelError = null; try { await assertModels(); } catch (e) { modelError = e.message; }
-        return json(res, 200, { sdk: '0.19.1', modelsReady: !modelError, modelError, active });
+        let upscaleError = null; try { await assertModels('upscale'); } catch (e) { upscaleError = e.message; }
+        return json(res, 200, { sdk: '0.19.1', model: 'SDXL 1.0 Q4_0', modelsReady: !modelError, modelError, upscaleReady: !upscaleError, active });
       }
       if (req.method === 'GET' && url.pathname === '/api/panels') {
         await mkdir(OUTPUT_DIR, { recursive: true });
@@ -75,7 +76,7 @@ export function createStudioServer() {
         if (active) return json(res, 409, { error: 'A render is already running. Wait or stop it first.' });
         if (!req.headers['content-type']?.startsWith('application/json')) return json(res, 415, { error: 'JSON required.' });
         const input = await body(req);
-        await assertModels();
+        await assertModels(url.pathname === '/api/upscale' ? 'upscale' : 'render');
         let scene;
         if (url.pathname === '/api/upscale') {
           if (!ID.test(input.sourceId)) throw new Error('Invalid panel ID.');
@@ -95,7 +96,7 @@ export function createStudioServer() {
         const data = await readFile(path.join(OUTPUT_DIR, name));
         res.writeHead(200, { 'Content-Type': name.endsWith('.png') ? 'image/png' : 'application/json', 'Cache-Control': 'no-store' }); res.end(data); return;
       }
-      const assets = { '/': 'index.html', '/app.js': 'app.js', '/style.css': 'style.css' };
+      const assets = { '/': 'index.html', '/app.js': 'app.js', '/board.js': 'board.js', '/style.css': 'style.css', '/planner.css': 'planner.css' };
       if (req.method === 'GET' && Object.hasOwn(assets, url.pathname)) {
         const file = assets[url.pathname];
         const data = await readFile(path.join(ROOT, 'public', file));
