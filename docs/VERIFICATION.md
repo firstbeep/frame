@@ -20,6 +20,19 @@ Date: 2026-09-24. These are observed results, not a promise that every hardware/
 - Browser layout tests passed at 1440×1080 and 390×844, without horizontal overflow, page JavaScript errors, or external browser requests. Tested with Chromium; the layout test also passed with installed Edge.
 - Real browser test clicked Render scene, observed busy state, rejected a concurrent render with HTTP 409, waited for Panel ready, and downloaded a real PNG. 20-step generation reported 7.32s, with 4.38s model loading; the full browser test took 17.5s.
 - `docs/evidence/studio.png` is an unmodified browser screenshot showing the genuine generated panel. The page's reveal animation was completed before capture.
+- Started a real render, cancelled it through the HTTP endpoint, and confirmed the job became `cancelled` and the render slot was released.
+
+## Clean-checkout reviewer run
+
+Created a separate Git clone at `artifacts/reviewer-clean`, with no copied `node_modules`, model files, or outputs. On the same Windows machine:
+
+1. `npm ci --no-audit --no-fund` installed all 209 locked packages successfully (npm's package download cache was available).
+2. `npm run doctor` successfully started the clone's own diffusion worker.
+3. `npm test` passed all four checks.
+4. `npm run setup` independently downloaded both models from their upstream URLs and verified their hashes.
+5. `npm run smoke` successfully loaded the clone's model files, generated a new panel, ran standalone 4× upscaling, and exited with code 0.
+
+This verifies a clean checkout and dependency/model setup on the tested machine. It does not emulate a different operating system or a machine missing the documented native prerequisites. The reference panel and its exact generation metadata are saved as `docs/evidence/panel.png` and `docs/evidence/shot-notes.json`.
 
 ## Scope and limits
 

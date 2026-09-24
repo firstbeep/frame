@@ -1,0 +1,33 @@
+{
+  "id": "f7011283-ac0b-4472-9589-db054e2046e0",
+  "scene": {
+    "prompt": "A pair of dark sunglasses resting on a brushed metal table, a single metal stool in the background, dramatic side lighting, minimalist concrete studio",
+    "shot": "close",
+    "mood": "noir",
+    "steps": 20,
+    "seed": 183,
+    "format": "wide"
+  },
+  "kind": "render",
+  "createdAt": "2026-09-24T04:21:13.380Z",
+  "sdk": "0.19.1",
+  "compiledPrompt": "A pair of dark sunglasses resting on a brushed metal table, a single metal stool in the background, dramatic side lighting, minimalist concrete studio, close-up detail shot, 85mm lens, shallow depth of field, black and white film noir, hard side lighting, deep shadows, dramatic contrast, cinematic still, photorealistic, practical set, fine film grain, carefully composed",
+  "stats": {
+    "modelLoadMs": 4383,
+    "generationMs": 7322,
+    "conditionerMs": 311.04,
+    "denoiseMs": 5852.8685,
+    "vaeMs": 1030.1074,
+    "postProcessMs": 128.3955,
+    "stepsPerSecond": 3.4171278579042057,
+    "totalGenerationMs": 7322,
+    "totalWallMs": 7322,
+    "totalSteps": 20,
+    "totalGenerations": 1,
+    "totalImages": 1,
+    "totalPixels": 344064,
+    "width": 768,
+    "height": 448,
+    "seed": 183
+  }
+}
