@@ -1,13 +1,13 @@
 # Model provenance
 
-The filenames, byte sizes, and hashes below were verified against `@qvac/inference`'s registry shipped with the `@qvac/sdk@0.19.1` install. `scripts/setup.js` uses fixed URLs and SHA-256 validation; `src/render.js` only loads local files.
+The filenames, sizes and SHA-256 hashes below match the model registry shipped with `@qvac/sdk@0.19.1`. `scripts/setup.js` pins URLs and verifies each download. `src/render.js` loads local paths.
 
 | Model | Size | SHA-256 |
 | --- | ---: | --- |
-| Stable Diffusion 2.1 Q8_0 | 2,322,705,024 bytes | `7b73fa47b4d1401bdf3a0898827fac94bced6633bf64ef7fe55492b6115cc74b` |
+| Stable Diffusion XL 1.0 Q4_0 | 3,940,010,720 bytes | `4ab9818c9b3428eca96834c51fe294885608480991463f55bd9be53c822567c3` |
 | RealESRGAN_x4plus | 67,040,989 bytes | `4fa0d38905f75ac06eb49a7951b426670021be3018265fd191d2125df9d682f1` |
 
-- [SD 2.1 quantized model source](https://huggingface.co/gpustack/stable-diffusion-v2-1-GGUF/tree/12ddc22724f6da35f0b6006e459fae66eaf56931): fixed repository revision. See its model card and upstream Stable Diffusion license (Open RAIL family) for use restrictions.
-- [Real-ESRGAN official release](https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.1.0): fixed release asset. See the [upstream project license](https://github.com/xinntao/Real-ESRGAN/blob/master/LICENSE).
+- [SDXL 1.0 quantized source and model card](https://huggingface.co/gpustack/stable-diffusion-xl-base-1.0-GGUF) — Open RAIL++-M license. Its model card notes limitations with text, people, and complex spatial relationships.
+- [Real-ESRGAN official release](https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.1.0) and [license](https://github.com/xinntao/Real-ESRGAN/blob/master/LICENSE).
 
-Models are not bundled in Git or covered by FRAME's MIT license. Local generated evidence was produced with these models; no stock photos or cloud-generated substitutes are used.
+Model weights are downloaded at setup and excluded from Git. FRAME's MIT license covers app code, not model weights. Existing saved SD 2.1 frames remain accessible as legacy frames; new inference uses SDXL.

@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 try {
   const sdk = await import('@qvac/sdk');
   const version = createRequire(import.meta.url)('@qvac/sdk/package').version;
-  const required = ['loadModel', 'unloadModel', 'upscale', 'diffusion', 'close','heartbeat'];
+  const required = ['loadModel', 'unloadModel', 'completion', 'diffusion', 'textToSpeech'];
   let missing = false;
   for (const name of required) {
     const type = typeof sdk[name];

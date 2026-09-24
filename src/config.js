@@ -20,5 +20,5 @@ export const MODELS = {
 export function configureRuntime() {
   process.env.QVAC_CONFIG_PATH ||= path.join(ROOT, 'qvac.config.json');
   process.env.QVAC_WORKER_PATH ||= path.join(ROOT, 'qvac', 'worker.entry.mjs');
-  process.env.QVAC_RPC_INIT_TIMEOUT_MS ||= '120000';
+  // Let qvac.config.json control the handshake unless the user explicitly overrides it.
 }
