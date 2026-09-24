@@ -1,4 +1,4 @@
-# FRAME — local shoot planner
+# FRAME — Cinematic Pre-Viz & Storyboard Studio
 
 FRAME helps a small production team agree on a visual direction before a product or location shoot. Write a brief for a specific shot, choose light and camera distance, then render a **natural-color concept image on your own computer**. Select useful frames and export a self-contained crew board with the image, props, lighting notes, and action for each shot. The board opens offline and can be printed or saved as PDF from a browser.
 
@@ -20,12 +20,12 @@ These are planning references. A generated image may get product details, text, 
 
 `@qvac/sdk` is an exact **`0.19.1` dependency** in `package.json` and `package-lock.json`. FRAME calls `loadModel`, `diffusion`, `upscale`, `unloadModel`, `heartbeat`, and `close`. `loadModel` loads a verified model from a local path; `diffusion` generates the concept frame; `upscale` enlarges a selected original frame. The other functions release resources and check the local worker. Rendering and upscaling use QVAC on-device. See [src/render.js](src/render.js).
 
-`npm run verify` checks five requested SDK exports—`loadModel`, `unloadModel`, `completion`, `diffusion`, and `textToSpeech`—and also checks `upscale`. **`completion` and `textToSpeech` are export checks only; FRAME does not use them for inference.** `npm run doctor` tests the real worker connection; `npm run smoke` performs actual image inference.
+`npm run verify` checks the five requested SDK exports—`loadModel`, `unloadModel`, `completion`, `diffusion`, and `textToSpeech`—plus the `upscale`, `heartbeat`, and `close` calls FRAME also makes. **`completion` and `textToSpeech` are export checks only; FRAME does not call them for inference.** `npm test` includes this export check. `npm run doctor` tests the real worker connection; `npm run smoke` performs actual image inference.
 
 ## Requirements
 
 - Node.js 22.17+ and npm 10.9+.
-- Windows 10/11 x64 with Vulkan 1.4 GPU drivers and Microsoft Visual C++ 2015–2022 x64 runtime; or a [QVAC-supported macOS/Linux host](https://docs.qvac.tether.io/getting-started/system-requirements/). Windows x64 with an RTX 4050 was tested.
+- Windows 10/11 x64 with Vulkan 1.4 GPU drivers and Microsoft Visual C++ 2015–2022 x64 runtime; or a [QVAC-supported macOS/Linux host](https://docs.qvac.tether.io/system-requirements/). Windows x64 with an RTX 4050 was tested.
 - For SDXL on a laptop, plan for roughly 16 GB RAM, a capable GPU with around 6 GB VRAM, and 12 GB free storage. Other hardware may take much longer or need CPU mode.
 - Internet during initial install and model setup. SDXL weights are 3.94 GB; the optional ESRGAN upscaler is 67 MB. Inference then loads local files.
 
@@ -36,13 +36,14 @@ git clone https://github.com/firstbeep/frame.git
 cd frame
 node --version
 npm --version
-npm ci
+npm install
 npm run verify
+npm test
 npm run doctor
 npm run setup
 ```
 
-Use `npm ci` to honor the committed lockfile. Keep npm optional dependencies and install scripts enabled so the platform's Bare/native packages install. `npm run setup` downloads fixed model versions into `.cache/models/`, verifies their SHA-256 hashes, and resumes interrupted downloads automatically. It may take several minutes. The old SD 2.1 model is no longer required; an existing `.cache/models/` copy can remain without affecting SDXL.
+`npm install` uses the committed lockfile and installs the pinned `@qvac/sdk@0.19.1`. Keep npm optional dependencies and install scripts enabled so the platform's Bare/native packages install. `npm test` verifies the installed SDK exports and runs the fast application checks; it does **not** render an image. `npm run doctor` starts the real QVAC worker. `npm run setup` downloads fixed model versions into `.cache/models/`, verifies their SHA-256 hashes, and resumes interrupted downloads automatically. It may take several minutes. The old SD 2.1 model is no longer required; an existing `.cache/models/` copy can remain without affecting SDXL.
 
 ## Run and use
 
@@ -62,7 +63,7 @@ npm run test:startup
 npm run smoke
 ```
 
-`npm test` checks scene bounds, untouched color PNG output, safe portable board export, error diagnostics, and server boundaries. `npm run test:startup` deliberately triggers and recovers from a real RPC initialization timeout. `npm run smoke` loads the local SDXL model, renders a color product frame, loads Real-ESRGAN, and upscales the generated image. It exits nonzero if real inference fails. See [the verification report](docs/VERIFICATION.md) and [an actual output with metadata](docs/evidence/shot-notes.json).
+`npm test` checks the installed SDK exports, scene bounds, untouched color PNG output, safe portable board export, error diagnostics, and server boundaries. `npm run test:startup` deliberately triggers and recovers from a real RPC initialization timeout. `npm run smoke` loads the local SDXL model, renders a color product frame, loads Real-ESRGAN, and upscales the generated image. It exits nonzero if real inference fails. See [the verification report](docs/VERIFICATION.md) and [an actual output with metadata](docs/evidence/shot-notes.json).
 
 Optional browser checks:
 
@@ -84,6 +85,7 @@ Finish npm installation and model setup while connected. FRAME sends prompts onl
 | Problem | Action |
 | --- | --- |
 | **RPC initialization timeout** (sometimes written “RCP”) | Run `npm run doctor`; keep the full error and worker cause. Confirm Node version, native optional packages, Vulkan 1.4 drivers, and the VC++ x64 runtime on Windows. FRAME's SDK config allows 500,000 ms for a slow handshake. A worker crash or missing DLL needs a dependency/driver fix; more waiting will not fix it. You can override only genuinely slow startup with `QVAC_RPC_INIT_TIMEOUT_MS=600000` (PowerShell: `$env:QVAC_RPC_INIT_TIMEOUT_MS="600000"`). |
+| Linux worker fails with `libatomic.so.1` missing | Install the distribution's `libatomic1` package, then rerun `npm run doctor`. |
 | Setup download interrupted | Run `npm run setup` again. Partial downloads resume automatically and completed files are hash-checked. |
 | Render disabled | Finish `npm run setup`, then refresh the page. |
 | GPU memory error | Close other GPU applications, choose Wide instead of Square, or try `FRAME_DEVICE=cpu npm start` (PowerShell: `$env:FRAME_DEVICE="cpu"; npm start`). Windows still requires Vulkan. |
