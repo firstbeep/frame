@@ -13,7 +13,7 @@ This checks the requirements in the user-provided `REQ.txt` against observable c
 | Inference on device | Worker runs on the laptop with local model file paths after setup. There are no cloud AI APIs. The browser talks to localhost. The tested device completed real SDXL diffusion and Real-ESRGAN upscaling. |
 | Working install and demo | `npm ci`, `npm run verify`, `npm run doctor`, `npm run setup`, `npm run smoke`, and the real browser render test were performed on Windows x64. A new reviewer machine still needs the documented native prerequisites and about 4 GB of model downloads. |
 | Screenshot / recording with actual AI output | `docs/evidence/studio.png` and `docs/evidence/panel.png` are made from the real browser/QVAC test. A user-reported Whop live demo showed two separate pictures; we cannot inspect the private Whop submission here. |
-| X post links repo and tags `@qvac` | The provided URL is [the X post]([https://x.com/firshbeepxvft/status/2103056780834308515]). X returned 403 to our read-only browser, so its text, link, tag, and attachments remain **unverified**. The X account handle differs from the GitHub handle, though the provided rules do not require them to match. |
+| X post links repo and tags `@qvac` | The provided URL is [the X post]-https://x.com/firshbeepxvft/status/2103056780834308515. X returned 403 to our read-only browser, so its text, link, tag, and attachments remain **unverified**. The X account handle differs from the GitHub handle, though the provided rules do not require them to match. |
 | Submit repo URL, X URL, and one to two lines describing the app/functions | Only the user can confirm what the Whop form received. Use the revised description below when resubmitting. |
 
 ## Improvements made for the resubmission
