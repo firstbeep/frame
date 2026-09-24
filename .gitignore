@@ -4,3 +4,5 @@ outputs/
 artifacts/
 *.log
 .env
+test-results/
+playwright-report/

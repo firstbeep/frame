@@ -64,7 +64,7 @@ $('scene-form').onsubmit = async event => {
   busy = true; controls(); error('');
   try {
     const scene = { prompt: $('prompt').value, shot: $('shot').value, mood: $('mood').value, format: $('format').value, steps: Number($('steps').value), seed: Number($('seed').value) };
-    localStorage.setItem('frame-draft', JSON.stringify(scene));
+    try { localStorage.setItem('frame-draft', JSON.stringify(scene)); } catch { /* Rendering also works when browser storage is disabled. */ }
     const job = await api('/api/render', scene); follow(job.id);
   } catch (e) { busy = false; controls(); error(e.message); }
 };

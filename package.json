@@ -13,11 +13,15 @@
     "start": "node src/server.js",
     "doctor": "node scripts/doctor.js",
     "setup": "node scripts/setup.js",
-    "test": "node --test",
+    "test": "node --test test/*.test.js",
+    "test:ui": "playwright test",
     "smoke": "node scripts/smoke.js"
   },
   "dependencies": {
     "@qvac/sdk": "0.19.1",
     "pngjs": "7.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2"
   }
 }
