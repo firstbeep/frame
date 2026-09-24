@@ -2,7 +2,7 @@
 
 FRAME is a local desktop web app for filmmakers, set designers, and solo creators. Describe an action line or physical set, choose a camera distance and lighting direction, and develop a monochrome storyboard panel on your own computer.
 
-## QVAC SDK: `@qvac/sdk` exactly `0.19.1`.** No API keys, cloud inference, remote fonts, or analytics. The interface opens in your browser; a Node.js server bound to `127.0.0.1` runs the native QVAC worker locally. It is not an Electron installer.
+
 
 ![FRAME running with a real locally generated image](docs/evidence/studio.png)
 
@@ -20,6 +20,7 @@ FRAME is a local desktop web app for filmmakers, set designers, and solo creator
 - Dedicated diffusion worker, extended RPC startup timeout, and actionable startup diagnostics.
 
 Scene parsing is deterministic: the app normalizes whitespace and combines the description with the chosen camera and lighting directions. QVAC performs image generation and upscaling. A local PNG pass ensures genuinely monochrome exports. A prompt guides composition; it does not guarantee exact object placement or continuity between shots.
+## QVAC SDK: `@qvac/sdk` exactly `0.19.1`.** No API keys, cloud inference, remote fonts, or analytics. The interface opens in your browser; a Node.js server bound to `127.0.0.1` runs the native QVAC worker locally. It is not an Electron installer.
 
 ## QVAC integration
 
@@ -45,7 +46,7 @@ The SDK returns the final image, not intermediate preview frames. The progress b
 
 See [QVAC system requirements](https://docs.qvac.tether.io/system-requirements/) for supported hosts. Update GPU drivers from NVIDIA, AMD, or Intel. Get the [Microsoft runtime from Microsoft](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist). Do not download DLLs from unofficial sites.
 
-## Install — fresh reviewer setup
+## Install — fresh setup
 
 Download this repository as a ZIP and extract it, or clone its public GitHub URL. Open a terminal in the project directory containing `package.json`.
 
@@ -169,4 +170,4 @@ FRAME_DEVICE=cpu npm start
 ```
 
 ## License
-[MIT](https://github.com/firstbeep/frame?tab=MIT-1-ov-file) 
+[MIT](https://github.com/firstbeep/frame?tab=MIT-1-ov-file) - Open Source License.
