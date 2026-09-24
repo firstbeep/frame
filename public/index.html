@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FRAME — Cinematic Pre-Viz Studio</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+<header><a class="brand" href="/">FRAME<span> / </span></a><span class="brand-sub">CINEMATIC PRE-VIZ STUDIO</span><div class="local"><i></i> ON-DEVICE INFERENCE <span class="version">QVAC 0.19.1</span></div></header>
+<main>
+  <section class="intro"><div><div class="eyebrow">FROM THE PAGE. TO THE SET.</div><h1>Find the frame.<br><em>Before you film.</em></h1></div><p>A scene, a light, a point of view.<br>Turn your words into a visual direction.<br>Made on your machine. Ready for your crew.</p></section>
+  <div id="setup" class="notice" hidden></div>
+  <section class="workspace">
+    <form id="scene-form" class="director">
+      <div class="section-label"><span>01 / DIRECTION</span><span class="tiny">YOUR NEXT SHOT</span></div>
+      <label for="prompt" class="field-title">Describe the scene</label>
+      <textarea id="prompt" maxlength="1500" required placeholder="A minimalist metal stool. Dark sunglasses on a table. A shaft of light cuts through an empty room."></textarea>
+      <div class="input-foot"><button type="button" id="example" class="text-button">↗ Try a scene</button><span id="count">0 / 1500</span></div>
+      <label for="shot">Camera distance</label><select id="shot"><option value="wide">Wide · 24 mm</option><option value="medium">Medium · 50 mm</option><option value="close">Close-up · 85 mm</option></select>
+      <label for="mood">Lighting direction</label><select id="mood"><option value="noir">Noir / hard light & deep shadows</option><option value="soft">Soft / quiet window light</option><option value="stark">Stark / architectural contrast</option></select>
+      <div class="two-col"><div><label for="format">Frame</label><select id="format"><option value="wide">Wide · 768 × 448</option><option value="square">Square · 512 × 512</option></select></div><div><label for="steps">Detail / steps</label><select id="steps"><option value="12">Draft · 12</option><option value="20" selected>Standard · 20</option><option value="30">Fine · 30</option></select></div></div>
+      <div class="seed-row"><label for="seed">Seed <span> / repeat a composition</span></label><input type="number" id="seed" min="0" max="2147483647" value="42" required><button type="button" id="random" title="Choose a random seed" aria-label="Choose a random seed">↻</button></div>
+      <button type="submit" id="render" class="primary">Render scene <span>↗</span></button>
+      <p class="fine-print">Local Stable Diffusion 2.1 · Monochrome finish<br>Rendering time depends on your hardware.</p>
+    </form>
+    <div class="viewer">
+      <div class="section-label"><span>02 / THE FRAME</span><span id="frame-label" class="tiny">AWAITING DIRECTION</span></div>
+      <div class="canvas" id="canvas"><img id="panel-image" alt="Generated cinematic storyboard panel" hidden><div id="empty"><div class="frame-mark">F<span> / </span></div><h2>Every film starts with a frame.</h2><p>Describe your scene to develop the first panel.</p><span class="frame-spec">LIGHT / SPACE / STORY</span></div><div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div></div>
+      <div class="status-row"><span id="status" role="status" aria-live="polite">Ready when you are.</span><span id="elapsed" class="tiny"></span></div><progress id="progress" max="100" value="0" hidden></progress>
+      <div id="error" class="error" role="alert" hidden></div>
+      <div class="toolbar"><span id="panel-meta">YOUR VISION, DEVELOPED LOCALLY.</span><div><button id="cancel" hidden>Stop render</button><button id="upscale" disabled>Upscale 4×</button><a id="download" class="button disabled" aria-disabled="true">↓ PNG</a><a id="metadata" class="button disabled" aria-disabled="true">↓ Shot notes</a></div></div>
+      <details id="runtime"><summary>LOCAL RUNTIME <span> / process log</span></summary><pre id="logs">Real QVAC progress will appear here during a render.</pre></details>
+    </div>
+  </section>
+  <section class="board"><div class="board-heading"><div class="section-label">03 / THE STORYBOARD</div><span id="panel-count" class="tiny">0 PANELS</span></div><div id="panels"><p class="board-empty">Your shots will collect here. Build a sequence, one frame at a time.</p></div></section>
+</main><footer><span>FRAME / LOCAL CINEMA TOOLS</span><span>Models download once during setup. No cloud inference. No API keys.</span><span>ROLL 001</span></footer>
+<script type="module" src="/app.js"></script>
+</body></html>
