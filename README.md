@@ -2,8 +2,6 @@
 
 FRAME is a local desktop web app for filmmakers, set designers, and solo creators. Describe an action line or physical set, choose a camera distance and lighting direction, and develop a monochrome storyboard panel on your own computer.
 
-![FRAME running with a real locally generated image](docs/evidence/studio.png)
-
 ## Features
 
 - Original, minimal cinematic interface with desktop and mobile layouts.
