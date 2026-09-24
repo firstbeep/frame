@@ -1,6 +1,6 @@
 # FRAME — Cinematic Pre-Viz & Storyboard Studio
 
-FRAME is a local desktop web app for filmmakers, set designers, and solo creators. Describe an action line or physical set, choose a camera distance and lighting direction, and develop a monochrome storyboard panel on your own computer.
+FRAME is a local desktop web app for filmmakers, set designers, and solo creators. Describe an action line or physical set, choose a camera distance and lighting direction, and develop a realistic storyboard panel on your own computer.
 
 ## Features
 
