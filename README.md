@@ -87,10 +87,11 @@ The server binds loopback only and rejects foreign origins and non-local Host he
 
 ```sh
 npm test
+npm run test:startup
 npm run smoke
 ```
 
-`npm test` checks input validation, PNG conversion, RPC error reporting, and HTTP boundaries without needing model files. `npm run smoke` requires setup: it performs **real** `loadModel` → `diffusion` → `upscale`, saves both PNGs in `outputs/`, and exits nonzero on failure. It may take several minutes on slower machines. The smoke test does not substitute a fixture for AI output.
+`npm test` checks input validation, PNG conversion, RPC error reporting, and HTTP boundaries without needing model files. `npm run test:startup` deliberately triggers a real RPC timeout with a 1 ms allowance, checks that it is explained, and verifies startup recovery with the normal allowance. `npm run smoke` requires setup: it performs **real** `loadModel` → `diffusion` → `upscale`, saves both PNGs in `outputs/`, and exits nonzero on failure. It may take several minutes on slower machines. The smoke test does not substitute a fixture for AI output.
 
 Optional browser tests:
 

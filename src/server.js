@@ -41,7 +41,7 @@ export function createStudioServer() {
       else if (event.type === 'failed') Object.assign(state, { status: 'failed', message: event.message });
     });
     child.on('error', error => Object.assign(state, { status: 'failed', message: error.message }));
-    child.on('exit', code => {
+    child.on('close', code => {
       if (state.status === 'running') Object.assign(state, { status: 'failed', message: `Worker exited (${code}). Run npm run doctor and inspect the terminal.` });
       clearTimeout(timer); timer = null; worker = null; active = null;
     });

@@ -12,6 +12,7 @@ Date: 2026-09-24. These are observed results, not a promise that every hardware/
 ## Observed passes
 
 - Initial `npm install` completed; real native-worker `heartbeat()` passed using the diffusion-only worker.
+- `npm run test:startup`: intentionally triggered a genuine RPC initialization timeout with a 1 ms allowance; the error included the troubleshooting guidance. A second process with the normal 120,000 ms allowance successfully started the worker afterward.
 - Both model files downloaded and matched the SDK registry SHA-256 hashes. The SD download was interrupted around 70%; rerunning setup successfully resumed and completed it.
 - `npm test`: four tests passed (input/resource bounds, monochrome conversion, nested RPC crash diagnostics, HTTP origin/host and file-path boundaries).
 - `npm run smoke`: actual model load, 12-step 768×448 diffusion, and standalone 4× ESRGAN inference passed. The PNG dimensions were 768×448 and 3072×1792. Model memory and RPC worker were released after each operation.

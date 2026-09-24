@@ -15,6 +15,7 @@
     "setup": "node scripts/setup.js",
     "test": "node --test test/*.test.js",
     "test:ui": "playwright test",
+    "test:startup": "node scripts/test-startup.js",
     "smoke": "node scripts/smoke.js"
   },
   "dependencies": {
