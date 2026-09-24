@@ -4,7 +4,7 @@ This checks the requirements in the user-provided `REQ.txt` against observable c
 
 | Requirement | Evidence and current state |
 | --- | --- |
-| Public GitHub repo | [firstbeep/frame](https://github.com/firstbeep/frame) is public. Push the current color release before using it as resubmission evidence. |
+| Public GitHub repo | [firstbeep/frame](https://github.com/firstbeep/frame) is public and is the repo for this color release. |
 | At least three commits authored by the applicant | Public history had at least seven commits with GitHub author `firstbeep`; this local work also uses `firstbeep <firstwhopsdk@gmail.com>`. Check the published history after the push. |
 | Open-source license | Root `LICENSE` is MIT and credits `firstbeep`. The earlier author name did not match the applicant. |
 | README includes project, SDK version, features, installation, run, troubleshooting | Root `README.md` now does this. An earlier public version had stale SD 2.1/monochrome claims and broken Markdown after the test command. |
