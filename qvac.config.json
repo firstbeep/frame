@@ -1,0 +1,8 @@
+{
+  "plugins": ["sdcpp-generation"],
+  "loggerLevel": "info",
+  "loggerConsoleOutput": true,
+  "rpcInitTimeoutMs": 120000,
+  "httpDownloadConcurrency": 2,
+  "httpConnectionTimeoutMs": 30000
+}
