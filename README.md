@@ -2,8 +2,6 @@
 
 FRAME is a local desktop web app for filmmakers, set designers, and solo creators. Describe an action line or physical set, choose a camera distance and lighting direction, and develop a monochrome storyboard panel on your own computer.
 
-**QVAC SDK: `@qvac/sdk` exactly `0.19.1`.** No API keys, cloud inference, remote fonts, or analytics. The interface opens in your browser; a Node.js server bound to `127.0.0.1` runs the native QVAC worker locally. It is not an Electron installer.
-
 ![FRAME running with a real locally generated image](docs/evidence/studio.png)
 
 ## Features
@@ -20,6 +18,23 @@ FRAME is a local desktop web app for filmmakers, set designers, and solo creator
 - Dedicated diffusion worker, extended RPC startup timeout, and actionable startup diagnostics.
 
 Scene parsing is deterministic: the app normalizes whitespace and combines the description with the chosen camera and lighting directions. QVAC performs image generation and upscaling. A local PNG pass ensures genuinely monochrome exports. A prompt guides composition; it does not guarantee exact object placement or continuity between shots.
+
+## QVAC SDK
+**`@qvac/sdk` exactly `0.19.1`.** - No API keys, cloud inference, remote fonts, or analytics. The interface opens in your browser; a Node.js server bound to `127.0.0.1` runs the native QVAC worker locally. It is not an Electron installer.
+
+## QVAC integration
+
+| SDK function | How FRAME uses it |
+| --- | --- |
+| `loadModel({ modelSrc, modelType, modelConfig })` | Loads a verified local SD 2.1 model or a standalone ESRGAN model using `sdcpp-generation`. |
+| `diffusion({ modelId, prompt, ... })` | Produces the original panel; `progressStream` reports real sampling steps, `outputs` returns PNG bytes. |
+| `upscale({ modelId, image, repeats: 1 })` | Performs one native 4× ESRGAN pass on the original panel. |
+| `unloadModel({ modelId, clearStorage: false })` | Releases model memory in a `finally` block. |
+| `heartbeat()` / `close()` | Verify the worker and clean up RPC resources. |
+
+Implementation: [src/render.js](src/render.js). All these functions were checked against the installed **0.19.1** package and exercised by the real smoke test. `@qvac/inference` is supplied by the SDK's locked dependency tree; the custom worker uses its plugin registration API. No changes to `node_modules` are needed.
+
+The SDK returns the final image, not intermediate preview frames. The progress bar reports actual denoising steps; a short reveal animation runs only after the genuine output arrives. Rendering is not guaranteed to finish in 15 seconds. Diffusion and upscaling timings depend on device, resolution, and quality.
 
 ## Requirements
 
@@ -38,14 +53,11 @@ Download this repository as a ZIP and extract it, or clone its public GitHub URL
 ```sh
 git clone https://github.com/firstbeep/frame.git
 cd frame
-node --version
-npm --version
-npm ci
+npm install
+npm run verify
 npm run doctor
 npm run setup
 ```
-
-Run these in order. `npm ci` uses the committed lockfile and exact SDK version; do not omit optional dependencies or disable install scripts. `doctor` starts the real QVAC worker and tests its RPC handshake. `setup` downloads the two fixed model versions, reports progress, and verifies their SHA-256 hashes against the SDK 0.19.1 registry metadata. Interrupted downloads are kept as `.part` files and resume when you rerun setup. Existing completed models are reverified and reused.
 
 Model weights live in `.cache/models/` and are intentionally excluded from Git. No Hugging Face account is needed for these downloads. The weights retain their upstream licenses; the app's MIT license does not relicense them. See [model provenance](docs/MODELS.md).
 
@@ -65,23 +77,10 @@ Open **http://127.0.0.1:3210**. Keep the terminal running.
 
 Press Ctrl+C in the server terminal to stop. Use **Stop render** to terminate only the active job. Completed panels persist in `outputs/`; thumbnails reload at startup. The app allows one inference job at a time to avoid competing for GPU memory. Upscaling an already upscaled panel is intentionally disabled.
 
-## QVAC integration
-
-| SDK function | How FRAME uses it |
-| --- | --- |
-| `loadModel({ modelSrc, modelType, modelConfig })` | Loads a verified local SD 2.1 model or a standalone ESRGAN model using `sdcpp-generation`. |
-| `diffusion({ modelId, prompt, ... })` | Produces the original panel; `progressStream` reports real sampling steps, `outputs` returns PNG bytes. |
-| `upscale({ modelId, image, repeats: 1 })` | Performs one native 4× ESRGAN pass on the original panel. |
-| `unloadModel({ modelId, clearStorage: false })` | Releases model memory in a `finally` block. |
-| `heartbeat()` / `close()` | Verify the worker and clean up RPC resources. |
-
-Implementation: [src/render.js](src/render.js). All these functions were checked against the installed **0.19.1** package and exercised by the real smoke test. `@qvac/inference` is supplied by the SDK's locked dependency tree; the custom worker uses its plugin registration API. No changes to `node_modules` are needed.
-
-The SDK returns the final image, not intermediate preview frames. The progress bar reports actual denoising steps; a short reveal animation runs only after the genuine output arrives. Rendering is not guaranteed to finish in 15 seconds. Diffusion and upscaling timings depend on device, resolution, and quality.
 
 ## Offline use and privacy
 
-Complete `npm ci` and `npm run setup` before leaving connectivity. Both model paths are local during rendering; FRAME does not call cloud AI or a model registry during inference. The browser communicates with the local server, so “offline” means **no internet required**, not zero localhost HTTP requests. Prompts, shot notes, and outputs stay on this computer. No network-disconnection test is claimed in the included verification report.
+Complete `npm install` and `npm run setup` before leaving connectivity. Both model paths are local during rendering; FRAME does not call cloud AI or a model registry during inference. The browser communicates with the local server, so “offline” means **no internet required**, not zero localhost HTTP requests. Prompts, shot notes, and outputs stay on this computer. No network-disconnection test is claimed in the included verification report.
 
 The server binds loopback only and rejects foreign origins and non-local Host headers. Do not expose it through a public tunnel. Prompts appear in locally saved shot notes; keep or delete those files as appropriate for your production.
 
@@ -95,28 +94,6 @@ npm run smoke
 
 `npm test` checks input validation, PNG conversion, RPC error reporting, and HTTP boundaries without needing model files. `npm run test:startup` deliberately triggers a real RPC timeout with a 1 ms allowance, checks that it is explained, and verifies startup recovery with the normal allowance. `npm run smoke` requires setup: it performs **real** `loadModel` → `diffusion` → `upscale`, saves both PNGs in `outputs/`, and exits nonzero on failure. It may take several minutes on slower machines. The smoke test does not substitute a fixture for AI output.
 
-Optional browser tests:
-
-```sh
-npx playwright install chromium
-npm run test:ui
-```
-
-To also exercise the Render button, worker, progress, and PNG download end to end:
-
-```powershell
-# Windows PowerShell
-$env:FRAME_E2E = "1"
-npm run test:ui
-```
-
-```sh
-# macOS / Linux
-FRAME_E2E=1 npm run test:ui
-```
-
-Browser tests create desktop/mobile screenshots in `artifacts/`. The real UI test refreshes `docs/evidence/studio.png`. See [verification results](docs/VERIFICATION.md) for tested hardware, results, and limits.
-
 ## Troubleshooting
 
 ### RPC initialization timeout (sometimes written “RCP initialization timeout”)
@@ -129,47 +106,6 @@ This means Node could not finish starting or connecting to the local Bare worker
 4. FRAME ships `qvac/worker.entry.mjs`, which registers only the diffusion addon. Keep that file in the checkout. Loading all SDK addons can introduce unrelated native-library failures.
 5. The default startup allowance is **120,000 ms**, configured before the SDK is imported. If startup is actually slow, increase it:
 
-```powershell
-$env:QVAC_RPC_INIT_TIMEOUT_MS = "240000"
-npm run doctor
-npm start
-```
-
-```sh
-QVAC_RPC_INIT_TIMEOUT_MS=240000 npm run doctor
-QVAC_RPC_INIT_TIMEOUT_MS=240000 npm start
-```
-
-The environment variable takes precedence over `rpcInitTimeoutMs` in `qvac.config.json`. A longer timeout cannot repair missing DLLs, a corrupt native package, or a driver crash. No automatic repeated worker restart conceals such failures. Unset stale custom `QVAC_WORKER_PATH` or `QVAC_CONFIG_PATH` overrides if they point to another project.
-
-### Other problems
-
-| Symptom | Action |
-| --- | --- |
-| Models missing / Render disabled | Run `npm run setup` online, then refresh the page. |
-| Setup says `terminated` or a network error | Rerun `npm run setup`; partial downloads resume. Check network/proxy access to Hugging Face and GitHub release downloads. |
-| Checksum failure | A bad `.part` file is discarded automatically. Retry setup. For a corrupted completed model, move the named file aside and rerun. |
-| GPU memory error or worker exits during render | Close other GPU apps, choose Square and Draft, or try CPU mode below. The application remains open; inspect its error and retry. |
-| Render takes a long time | First model loading takes time. Inspect real steps in the terminal. CPU rendering can be much slower. Jobs have a 30-minute upper bound. |
-| Port 3210 is busy | Stop the previous FRAME server or set `PORT=3211` and visit the corresponding URL. |
-| A job continues after refreshing | The page reconnects to the active job. Use Stop render if it is no longer wanted. |
-| Browser test cannot find Chromium | Run `npx playwright install chromium`; optionally set `PLAYWRIGHT_CHANNEL=msedge` to use installed Edge. |
-| Cannot use `qvac doctor` | That is a separate CLI. FRAME's command is **`npm run doctor`** and needs no global QVAC CLI. |
-
-CPU fallback (Windows still requires Vulkan):
-
-```powershell
-$env:FRAME_DEVICE = "cpu"
-npm start
-```
-
-```sh
-FRAME_DEVICE=cpu npm start
-```
-
-## Bounty submission
-
-This repository contains an original implementation, exact QVAC dependency, real SDK calls, MIT license, reviewer instructions, tests, and a screenshot of real output. Public hosting and a social post are separate submission steps. Follow [SUBMISSION.md](SUBMISSION.md) for the checklist and a ready-to-edit X post. Bounty approval is decided by the organizer and is not guaranteed by this project or SDK version.
 
 ## License
 [MIT](https://github.com/firstbeep/frame?tab=MIT-1-ov-file) - Open Source License.
