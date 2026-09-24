@@ -14,6 +14,8 @@ Observed on Windows x64 with Node 24.21.0, npm 11.19.0, 15.7 GiB RAM, NVIDIA RTX
 
 The smoke render took 45.25 seconds for generation on the tested GPU, plus 8.78 seconds to load the model. The browser render took 46.82 seconds for generation, plus 7.70 seconds for model loading. These are observations on this machine, not a speed promise.
 
+For a reviewer-style checkout, a separate clone at `artifacts/release-review` installed 209 packages with `npm ci`, passed `npm run verify`, `npm run doctor`, and all five tests. Its model files were hard-linked from the already downloaded, hash-verified local files so the second checkout did not repeat a 4 GB network download; `npm run setup` reverified both hashes. `npm run smoke` then completed a new SDXL render and a new 4× upscale from the clone. The main checkout had already performed the full SDXL download from the pinned URL, including an interrupted transfer that resumed successfully.
+
 The real browser screenshot is [studio.png](evidence/studio.png), with the exact generated [panel PNG](evidence/panel.png), [shot metadata](evidence/shot-notes.json), and a portable [crew board](evidence/crew-board.html). The screenshot has no synthetic placeholder image. Browser network requests in the test remained local. A full system network-disconnection test, other operating systems, CPU mode, and every possible GPU driver have not been tested.
 
 The previous SD 2.1/monochrome evidence and timing remain in Git history but no longer describe the current app. Public hosting, X content, and the private Whop submission are audited separately in [REVIEWER-AUDIT.md](REVIEWER-AUDIT.md).
