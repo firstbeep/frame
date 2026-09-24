@@ -24,10 +24,10 @@ Scene parsing is deterministic: the app normalizes whitespace and combines the d
 
 | SDK function | How FRAME uses it |
 | --- | --- |
-| `loadModel({ modelSrc, modelType, modelConfig })` | Loads a verified local SD 2.1 model or a standalone ESRGAN model using `sdcpp-generation`. |
-| `diffusion({ modelId, prompt, ... })` | Produces the original panel; `progressStream` reports real sampling steps, `outputs` returns PNG bytes. |
-| `upscale({ modelId, image, repeats: 1 })` | Performs one native 4× ESRGAN pass on the original panel. |
-| `unloadModel({ modelId, clearStorage: false })` | Releases model memory in a `finally` block. |
+| `loadModel()` | Loads a verified local SD 2.1 model or a standalone ESRGAN model using `sdcpp-generation`. |
+| `diffusion()` | Produces the original panel; `progressStream` reports real sampling steps, `outputs` returns PNG bytes. |
+| `upscale()` | Performs one native 4× ESRGAN pass on the original panel. |
+| `unloadModel()` | Releases model memory in a `finally` block. |
 | `heartbeat()` / `close()` | Verify the worker and clean up RPC resources. |
 
 Implementation: [src/render.js](src/render.js). All these functions were checked against the installed **0.19.1** package and exercised by the real smoke test. `@qvac/inference` is supplied by the SDK's locked dependency tree; the custom worker uses its plugin registration API. No changes to `node_modules` are needed.
