@@ -56,7 +56,26 @@ test('real SDXL render preserves color and exports a usable crew board', async (
   await file.saveAs('artifacts/crew-board.html');
   const board = await fs.readFile('artifacts/crew-board.html','utf8');
   expect(board).toContain('Skincare launch / crew plan'); expect(board).toContain('data:image/png;base64,'); expect(board).toContain('white bounce card right');
+  await fs.writeFile('docs/evidence/crew-board.html', board);
   await page.getByRole('button',{name:'Reuse brief'}).click();
   await expect(page.getByLabel('Shot title')).toHaveValue('Product hero — morning light');
   expect(errors).toEqual([]);
+});
+test('setup readiness recovers without refresh and optional upscale does not block rendering', async ({page}) => {
+  let ready = false, upscaleReady = false;
+  await page.route('**/api/status', route => route.fulfill({ json: {
+    sdk:'0.19.1', modelsReady:ready, upscaleReady, active:null, modelError:ready ? null : 'Run npm run setup.'
+  } }));
+  await page.goto('/');
+  await page.getByLabel('Describe the scene').fill('Keep this brief while setup finishes');
+  await expect(page.getByRole('button',{name:'Render scene'})).toBeDisabled();
+  await expect(page.locator('#setup')).toBeVisible();
+  ready = true;
+  await expect(page.getByRole('button',{name:'Render scene'})).toBeEnabled({timeout:10000});
+  await expect(page.locator('#setup')).toBeHidden();
+  await expect(page.locator('#upscale-setup')).toBeVisible();
+  await expect(page.getByRole('button',{name:'Upscale 4×'})).toBeDisabled();
+  upscaleReady = true;
+  await expect(page.locator('#upscale-setup')).toBeHidden({timeout:10000});
+  await expect(page.getByLabel('Describe the scene')).toHaveValue('Keep this brief while setup finishes');
 });

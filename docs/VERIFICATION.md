@@ -1,5 +1,19 @@
 # Verification report
 
+## Accepted-project comparison revision — 2026-09-24
+
+- `npm test`: all six SDK functions used by FRAME were present; all **nine** application/model-setup tests passed. New setup tests use a local HTTP server to check fresh downloads, resumed downloads, servers that ignore Range requests, bad hashes, damaged cached files, and verified cache reuse with an unreachable download URL.
+- `npm run setup`: both existing SDXL and Real-ESRGAN files passed SHA-256 verification. A second full 4 GB download was unnecessary; the downloader's changed paths were exercised with local fixtures.
+- `FRAME_E2E=1 npm run test:ui`: **three** browser tests passed. Playwright launched the server through `npm start`, including its automatic SDXL verification. Checks covered desktop/mobile layouts, a real SDXL render, concurrent-job rejection, original PNG and shot metadata, portable crew board export, brief reuse, and automatic setup readiness recovery with an unavailable optional upscaler.
+- `npm run test:startup`: the intentional real RPC timeout and subsequent worker recovery both passed.
+- `npm run smoke`: a fresh local SDXL render and Real-ESRGAN upscale both passed. PNG dimensions were checked as 1024×1024 and 4096×4096; both models were unloaded and their worker connections closed. Local output IDs: `13926973-85dd-462b-9d39-8ff0c11116ac` (render) and `2f0b4224-aa89-415a-8c61-4f7a09e81416` (upscale).
+- The latest browser render produced a 1024×1024 PNG, with **53.35 seconds** of generation and **8.98 seconds** of model loading reported by QVAC. The screenshot, metadata, and crew board were refreshed from this run. The PNG matched the previous deterministic seed output.
+- [demo.webm](evidence/demo.webm) is the unedited Playwright recording of the successful real render/board workflow. Setup-state transitions in the separate readiness test are simulated HTTP responses; the demo's diffusion output is real QVAC inference.
+
+The original clean-clone and hardware observations below are retained as historical evidence, not represented as newly rerun installs. Current SDK verification covers only FRAME's actual functions; it no longer checks unused completion/speech exports.
+
+## Previous verification
+
 Observed on Windows x64 with Node 24.21.0, npm 11.19.0, 15.7 GiB RAM, NVIDIA RTX 4050 Laptop GPU, and Vulkan 1.4. The installed package and lockfile use `@qvac/sdk@0.19.1`.
 
 | Check | Result |

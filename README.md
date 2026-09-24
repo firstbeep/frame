@@ -1,96 +1,172 @@
-# FRAME — Cinematic Pre-Viz & Storyboard Studio
+# 🎬 FRAME
 
-FRAME helps a small production team agree on a visual direction before a product or location shoot. Write a brief for a specific shot, choose light and camera distance, then render a **natural-color concept image on your own computer**. Select useful frames and export a self-contained crew board with the image, props, lighting notes, and action for each shot. The board opens offline and can be printed or saved as PDF from a browser.
+On-device shoot planner for small production teams — turn a brief into a natural-color concept frame, enlarge a selected image, and export a printable crew board with the QVAC SDK.
 
-![FRAME running with a real SDXL color frame](docs/evidence/studio.png)
+FRAME is for product photographers, filmmakers, and crews who need to agree on a shot before arriving on set. Describe an amber bottle in morning light, a café interior, or a campsite hero shot, choose the camera distance and lighting, then click **Render scene**. You get:
 
-These are planning references. A generated image may get product details, text, people, scale, or physical layout wrong; confirm them on set.
+- 🖼️ A full-color concept frame generated locally with Stable Diffusion XL.
+- 🔍 Optional 4× enlargement with Real-ESRGAN.
+- 📋 A portable crew board with selected frames, shot titles, props, lighting notes, and action.
+
+No cloud AI. No API keys. After installation and the one-time model download, inference uses local files and the crew board opens offline.
+
+![FRAME with an actual QVAC-generated SDXL frame](docs/evidence/studio.png)
+
+[Watch the real browser demo](docs/evidence/demo.webm) · [Example frame](docs/evidence/panel.png) · [Exported crew board](docs/evidence/crew-board.html)
 
 ## Features
 
-- Three practical starting briefs: skincare product hero, café location, and outdoor brand film.
-- SDXL 1.0 Q4_0 concept rendering in natural color, with camera, light, aspect ratio, steps, and reproducible seed controls.
-- Real diffusion progress and clear worker errors, including RPC startup problems.
-- Original full-color PNGs, optional Real-ESRGAN 4× upscale, and JSON shot metadata.
-- Shot title and crew notes stored with each frame. Notes guide the crew; they are not sent to the image model.
-- Saved local gallery, reusable brief, and a portable printable board with embedded images and selected shots in order.
-- Localhost-only interface. No cloud AI, API key, analytics, or remote browser assets.
+- **A practical starting point.** Product, café, and outdoor shoot briefs include a scene description and editable crew notes.
+- **Control the composition.** Choose wide, medium, or close-up camera distance; six lighting directions; wide, square, or portrait format; detail steps; and a reproducible seed.
+- **Natural-color SDXL frames.** Save the original PNG without a monochrome filter. Sampling progress appears in the browser and terminal; the final image appears when generation finishes.
+- **Optional 4× upscaling.** Enlarge an original frame with local Real-ESRGAN. Rendering works even when the upscaler has not been installed.
+- **A reusable shot library.** Frames and JSON metadata persist locally. Reuse a brief, select shots in sequence, and export a self-contained HTML crew board for printing or saving as PDF.
+- **Automatic first-run setup.** `npm start` downloads and verifies SDXL if needed. Interrupted downloads resume; cached models are SHA-256 checked and reused without network requests.
+- **Visible job state.** Follow progress, reconnect after a refresh, or stop a render. Only one inference job runs at a time to limit memory use.
+- **Local by design.** The app binds to `127.0.0.1`, serves its browser assets locally, and has no analytics or cloud inference calls.
 
-## QVAC dependency and calls
+## QVAC dependency
 
-`@qvac/sdk` is an exact **`0.19.1` dependency** in `package.json` and `package-lock.json`. FRAME calls `loadModel`, `diffusion`, `upscale`, `unloadModel`, `heartbeat`, and `close`. `loadModel` loads a verified model from a local path; `diffusion` generates the concept frame; `upscale` enlarges a selected original frame. The other functions release resources and check the local worker. Rendering and upscaling use QVAC on-device. See [src/render.js](src/render.js).
+| | |
+| --- | --- |
+| SDK | [`@qvac/sdk`](https://www.npmjs.com/package/@qvac/sdk) |
+| Version | **0.19.1**, pinned exactly in `package.json` and `package-lock.json` |
+| Runtime | Node.js **≥ 22.17**, npm **≥ 10.9** |
+| Inference | On-device, using the QVAC `sdcpp-generation` worker |
+| Other runtime dependency | `pngjs@7.0.0` validates PNG output while preserving its color bytes |
+| Development dependency | `@playwright/test@1.58.2` runs browser checks and records the real demo |
 
-`npm run verify` checks the five requested SDK exports—`loadModel`, `unloadModel`, `completion`, `diffusion`, and `textToSpeech`—plus the `upscale`, `heartbeat`, and `close` calls FRAME also makes. **`completion` and `textToSpeech` are export checks only; FRAME does not call them for inference.** `npm test` includes this export check. `npm run doctor` tests the real worker connection; `npm run smoke` performs actual image inference.
+## SDK functions used
 
-## Requirements
+| QVAC function | Model / resource | What it does here |
+| --- | --- | --- |
+| `loadModel` | SDXL 1.0 Q4_0 or RealESRGAN_x4plus | Loads a verified local model file for the requested job |
+| `diffusion` | SDXL 1.0 Q4_0 | Generates the scene PNG and reports sampling steps |
+| `upscale` | RealESRGAN_x4plus | Enlarges an original frame by 4× |
+| `unloadModel` | Active model | Releases the loaded model after the job |
+| `heartbeat` | Local QVAC worker | Checks the worker connection before model loading |
+| `close` | Local QVAC worker | Closes the SDK connection after the job |
 
-- Node.js 22.17+ and npm 10.9+.
-- Windows 10/11 x64 with Vulkan 1.4 GPU drivers and Microsoft Visual C++ 2015–2022 x64 runtime; or a [QVAC-supported macOS/Linux host](https://docs.qvac.tether.io/system-requirements/). Windows x64 with an RTX 4050 was tested.
-- For SDXL on a laptop, plan for roughly 16 GB RAM, a capable GPU with around 6 GB VRAM, and 12 GB free storage. Other hardware may take much longer or need CPU mode.
-- Internet during initial install and model setup. SDXL weights are 3.94 GB; the optional ESRGAN upscaler is 67 MB. Inference then loads local files.
+These are the six SDK functions FRAME actually calls in [src/render.js](src/render.js). It uses local file paths instead of SDK registry constants; pinned sources and hashes are in [src/config.js](src/config.js). FRAME does not use `completion` or `textToSpeech`.
 
-## Install from a fresh clone
+After installing dependencies, verify the installed SDK exports with:
+
+```sh
+npm run verify
+# ✓ loadModel: function
+# ✓ diffusion: function
+# ✓ upscale: function
+# ✓ unloadModel: function
+# ✓ heartbeat: function
+# ✓ close: function
+# All 6 SDK functions used by FRAME are present (@qvac/sdk v0.19.1).
+```
+
+This checks exports and the SDK version. `npm run doctor` checks the real worker; `npm run smoke` tests actual image generation and upscaling.
+
+## Install
+
+**Prerequisites**
+
+- Node.js ≥ 22.17 and npm ≥ 10.9 ([nodejs.org](https://nodejs.org/)).
+- Windows x64: Vulkan 1.4 capable drivers and Microsoft Visual C++ 2015–2022 x64 runtime. Other hosts must meet [QVAC's system requirements](https://docs.qvac.tether.io/system-requirements/).
+- For SDXL, plan for roughly 16 GB RAM, a capable GPU with around 6 GB VRAM, and 12 GB free storage. Windows with an RTX 4050 Laptop GPU was tested; other hardware may be slower.
+- Internet for package installation and initial model downloads: SDXL is 3.94 GB; the optional upscaler adds 67 MB.
 
 ```sh
 git clone https://github.com/firstbeep/frame.git
 cd frame
-node --version
-npm --version
 npm install
-npm run verify
-npm test
-npm run doctor
-npm run setup
 ```
 
-`npm install` uses the committed lockfile and installs the pinned `@qvac/sdk@0.19.1`. Keep npm optional dependencies and install scripts enabled so the platform's Bare/native packages install. `npm test` verifies the installed SDK exports and runs the fast application checks; it does **not** render an image. `npm run doctor` starts the real QVAC worker. `npm run setup` downloads fixed model versions into `.cache/models/`, verifies their SHA-256 hashes, and resumes interrupted downloads automatically. It may take several minutes. The old SD 2.1 model is no longer required; an existing `.cache/models/` copy can remain without affecting SDXL.
+Keep npm optional dependencies and install scripts enabled so QVAC's native packages install. Model weights are downloaded separately on first start and are excluded from Git.
 
-## Run and use
+## Run
 
 ```sh
 npm start
 ```
 
-Open **http://127.0.0.1:3210**. Select a shoot brief or type your own short description. Add a shot title and crew notes, choose camera and lighting, and click **Render scene**. Progress appears in the page and terminal. Download the resulting PNG, or use **Upscale 4×** on an original frame. Check the frames for accuracy, select the ones your crew needs, set a project name, and click **Export printable board**. Open the downloaded HTML file and use your browser's Print command for paper or PDF.
+On first start, FRAME downloads SDXL into `.cache/models/`, shows download progress, and verifies its SHA-256 hash before starting the server. Later starts verify the cached file without downloading it again. Wait for:
 
-Frames and JSON shot notes persist in `outputs/`. See an [exported crew board](docs/evidence/crew-board.html) from the real browser test. The app allows one job at a time and can reconnect after a browser refresh. **Stop render** terminates the active worker. Press Ctrl+C in the terminal to stop the server.
-
-## Tests and proof
-
-```sh
-npm test
-npm run test:startup
-npm run smoke
+```text
+Open http://127.0.0.1:3210
 ```
 
-`npm test` checks the installed SDK exports, scene bounds, untouched color PNG output, safe portable board export, error diagnostics, and server boundaries. `npm run test:startup` deliberately triggers and recovers from a real RPC initialization timeout. `npm run smoke` loads the local SDXL model, renders a color product frame, loads Real-ESRGAN, and upscales the generated image. It exits nonzero if real inference fails. See [the verification report](docs/VERIFICATION.md) and [an actual output with metadata](docs/evidence/shot-notes.json).
+Open that address, click **Use shoot brief**, then **Render scene**. Try the supplied product brief first. Once the image appears, download the PNG, edit or reuse the brief, and render another shot. Select frames in shoot order, name the project, and click **Export printable board**. Open the downloaded HTML file to print or save as PDF.
 
-Optional browser checks:
+To install the optional upscaler or prepare both models before going offline:
+
+```sh
+npm run setup
+```
+
+Then select an original frame and click **Upscale 4×**. The page detects completed setup automatically. You can run setup in a second terminal while the studio is open; run only one setup/download process at a time.
+
+Images and shot metadata are saved in `outputs/`. **Stop render** terminates the active job; Ctrl+C stops the server. Each job loads and unloads its model to release memory afterward. On the previously tested RTX 4050, a 28-step square render took about 45 seconds for generation plus model loading; timing depends on hardware.
+
+## Troubleshooting
+
+| Problem | What to do |
+| --- | --- |
+| First start is downloading for a while | SDXL is 3.94 GB. Wait for the local URL in the terminal. If interrupted, rerun `npm start`; partial downloads resume. |
+| Download fails or the machine is offline | Complete `npm start` while connected once. For both models, run `npm run setup` before going offline. |
+| Incorrect checksum | Move aside only the named damaged file under `.cache/models/`, then rerun setup. Completed downloads must match the pinned SHA-256. |
+| RPC initialization timeout | Run `npm run doctor`. Check its full worker error, native optional packages, GPU drivers, and the Windows VC++ runtime. `qvac.config.json` allows 500,000 ms for startup; increasing it cannot fix a missing DLL or worker crash. |
+| Vulkan / DLL error on Windows | Update GPU drivers and install the VC++ x64 runtime. The worker needs Vulkan even when using CPU inference. |
+| Linux reports `libatomic.so.1` missing | Install your distribution's `libatomic1` package, then rerun `npm run doctor`. |
+| Render disabled | Complete model setup. The page rechecks readiness automatically without clearing your brief. |
+| Upscale disabled | Run `npm run setup`, select an original frame, and wait for any active job to finish. Upscaling an already enlarged frame is disabled. |
+| GPU memory error or slow render | Close other GPU applications and try Wide with Draft detail. To try CPU mode in PowerShell: `$env:FRAME_DEVICE="cpu"; npm start`. CPU mode has not been validated here. |
+| Port 3210 busy | Stop your previous FRAME server, or use `$env:PORT="3211"; npm start` in PowerShell (`PORT=3211 npm start` in a POSIX shell). Open the new port. |
+| SDK verification says module not found | Run `npm install` before `npm run verify`. |
+
+## How it works
+
+```text
+npm start → verify/download SDXL → local HTTP server
+
+browser → POST /api/render → isolated job process
+                              ├─ heartbeat() → local worker
+                              ├─ loadModel() → SDXL from disk
+                              ├─ diffusion() → progress + full-color PNG
+                              └─ unloadModel() / close()
+
+selected frame → POST /api/upscale → loadModel() → upscale() → 4× PNG
+                                                    └─ unloadModel() / close()
+
+selected frames + crew notes → embedded HTML crew board → print / save as PDF
+```
+
+[src/scene.js](src/scene.js) validates the brief and combines its visual description with camera and lighting choices. Crew notes stay separate from the image prompt. [src/server.js](src/server.js) manages jobs and saved frames; [public/board.js](public/board.js) builds the portable board. The worker imports only the diffusion plugin used by this app.
+
+These images are planning references. Confirm real product details, text, scale, and lighting on set.
+
+## Verification and demo
+
+```sh
+npm test                 # SDK exports, application checks, model download/cache checks
+npm run doctor           # Real worker handshake
+npm run setup            # Prepare both model files
+npm run smoke            # Real SDXL generation + Real-ESRGAN 4× upscale
+npm run test:startup     # Real timeout diagnostics and worker recovery
+```
+
+For browser checks:
 
 ```sh
 npx playwright install chromium
 npm run test:ui
 ```
 
-To run the real Render-button/browser integration test, set `FRAME_E2E=1` before `npm run test:ui` (PowerShell: `$env:FRAME_E2E = "1"`). It refreshes the screenshot above after a successful real render.
+To also run and record the real Render-button workflow, set `FRAME_E2E=1` before `npm run test:ui` (PowerShell: `$env:FRAME_E2E="1"`). This refreshes the screenshot, generated frame, metadata, and crew board under `docs/evidence/`; Playwright saves recordings in `test-results/`. The linked demo is a recording of that real workflow.
 
-The screenshot and example panel in `docs/evidence/` show actual QVAC output. The SDK reports sampling steps but does not stream intermediate image previews. The interface displays the image once QVAC returns its PNG. A fast demo on one GPU does not guarantee a 15-second render on reviewer hardware.
+See [verification results](docs/VERIFICATION.md), [model provenance](docs/MODELS.md), and [the comparison with Tavern Master](docs/COMPARISON.md). No system-wide network-disconnection test or cross-platform GPU test is claimed.
 
-## Offline and privacy
+## License
 
-Finish npm installation and model setup while connected. FRAME sends prompts only to the local server on `127.0.0.1`; QVAC loads local model paths during inference. Images, briefs, and boards remain on the local machine. “Offline” means internet is unnecessary after setup; the browser still makes localhost requests. The supplied test report does not claim a system-wide network-disconnection test.
+MIT — see [LICENSE](LICENSE). Model weights have their own [licenses and sources](docs/MODELS.md).
 
-## Troubleshooting
+---
 
-| Problem | Action |
-| --- | --- |
-| **RPC initialization timeout** (sometimes written “RCP”) | Run `npm run doctor`; keep the full error and worker cause. Confirm Node version, native optional packages, Vulkan 1.4 drivers, and the VC++ x64 runtime on Windows. FRAME's SDK config allows 500,000 ms for a slow handshake. A worker crash or missing DLL needs a dependency/driver fix; more waiting will not fix it. You can override only genuinely slow startup with `QVAC_RPC_INIT_TIMEOUT_MS=600000` (PowerShell: `$env:QVAC_RPC_INIT_TIMEOUT_MS="600000"`). |
-| Linux worker fails with `libatomic.so.1` missing | Install the distribution's `libatomic1` package, then rerun `npm run doctor`. |
-| Setup download interrupted | Run `npm run setup` again. Partial downloads resume automatically and completed files are hash-checked. |
-| Render disabled | Finish `npm run setup`, then refresh the page. |
-| GPU memory error | Close other GPU applications, choose Wide instead of Square, or try `FRAME_DEVICE=cpu npm start` (PowerShell: `$env:FRAME_DEVICE="cpu"; npm start`). Windows still requires Vulkan. |
-| Slow render | SDXL uses more compute than the old model; a 28-step 1024×1024 frame took around 45 seconds for generation on the tested RTX 4050, plus model loading. Try Draft (20 steps). |
-| Port 3210 busy | Stop the previous server or set `PORT=3211` and visit `http://127.0.0.1:3211`. |
-| `qvac doctor` not found | That is a separate CLI. Use FRAME's `npm run doctor`. |
-
-Model weights are **not** covered by FRAME's [MIT license](LICENSE); see [model sources and licenses](docs/MODELS.md). The public repo and X post are linked in [the reviewer audit](docs/REVIEWER-AUDIT.md). The organizer alone determines bounty eligibility; the specific rejection reason has not been provided to us.
+Built with [QVAC](https://qvac.tether.io/) — on-device AI for planning the next shoot. No API keys, no cloud inference.

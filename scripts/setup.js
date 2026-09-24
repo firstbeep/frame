@@ -1,64 +1,20 @@
-import { createReadStream, createWriteStream } from 'node:fs';
-import { mkdir, stat, rename, rm } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
-import { Readable, Transform } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
-import path from 'node:path';
 import { MODELS, MODEL_DIR } from '../src/config.js';
+import { ensureModel } from '../src/models.js';
 
-async function checksum(file) {
-  const hash = createHash('sha256');
-  for await (const chunk of createReadStream(file)) hash.update(chunk);
-  return hash.digest('hex');
-}
-await mkdir(MODEL_DIR, { recursive: true });
 try {
-  for (const model of Object.values(MODELS)) {
-    for (let attempt = 1; attempt <= 4; attempt++) {
-    try {
-    const destination = path.join(MODEL_DIR, model.file);
-    if (await stat(destination).catch(() => null)) {
-      if (await checksum(destination) === model.sha256) {
-        console.log(`Verified cached ${model.file}`);
-        break;
-      }
-      throw new Error(`${destination} has an incorrect checksum. Move it aside and rerun setup.`);
-    }
-    const partial = `${destination}.part`;
-    let offset = (await stat(partial).catch(() => null))?.size || 0;
-    if (offset > model.bytes) { await rm(partial); offset = 0; }
-    if (offset < model.bytes) {
-      console.log(`Downloading ${model.file} (${(model.bytes / 1e9).toFixed(2)} GB); resumes on retry.`);
-      const response = await fetch(model.url, { headers: offset ? { Range: `bytes=${offset}-` } : {}, signal: AbortSignal.timeout(3600000) });
-      if (!response.ok) throw new Error(`Download HTTP ${response.status}: ${model.url}`);
-      if (response.status !== 206) offset = 0;
-      if (response.status === 206 && !response.headers.get('content-range')?.startsWith(`bytes ${offset}-`)) throw new Error('Invalid resume response');
-      let received = offset;
-      let last = -1;
-      const progress = new Transform({ transform(chunk, _, callback) {
-        received += chunk.length;
-        const percent = Math.floor(received / model.bytes * 100);
-        if (percent >= last + 5) { console.log(`${model.file}: ${percent}%`); last = percent; }
-        callback(null, chunk);
-      } });
-      await pipeline(Readable.fromWeb(response.body), progress, createWriteStream(partial, { flags: offset ? 'a' : 'w' }));
-    }
-    if ((await stat(partial)).size !== model.bytes || await checksum(partial) !== model.sha256) {
-      await rm(partial);
-      throw new Error(`Checksum/size mismatch for ${model.file}; retry setup.`);
-    }
-    await rename(partial, destination);
-    console.log(`SHA-256 verified: ${model.file}`);
-    break;
-    } catch (error) {
-      if (attempt === 4) throw error;
-      console.warn(`Download/check attempt ${attempt} failed: ${error.message}. Resuming in ${attempt * 2}s…`);
-      await new Promise(resolve => setTimeout(resolve, attempt * 2000));
-    }
-    }
+  const args = process.argv.slice(2);
+  if (args.some(arg => arg !== '--render-only')) throw new Error('Usage: npm run setup [-- --render-only]');
+  const renderOnly = args.includes('--render-only');
+  console.log(renderOnly
+    ? 'Preparing FRAME: checking SDXL (first start downloads 3.94 GB).'
+    : 'Preparing SDXL and the optional 4x upscaler for offline use.');
+  for (const model of renderOnly ? [MODELS.diffusion] : Object.values(MODELS)) {
+    await ensureModel(model, MODEL_DIR);
   }
-  console.log('Models ready. Rendering now uses local file paths only. Run npm run smoke, then npm start.');
+  console.log(renderOnly
+    ? 'SDXL file verified. Starting the studio; the model loads when you render.\nFor optional 4x upscaling, run npm run setup once.'
+    : 'Both models verified. Run npm start, or npm run smoke to test real inference.');
 } catch (error) {
-  console.error(`Setup failed: ${error.message}\nPartial downloads are kept. Retry npm run setup when connected.`);
+  console.error(`Setup failed: ${error.message}\nPartial downloads are kept. Retry npm start or npm run setup when connected.`);
   process.exitCode = 1;
 }

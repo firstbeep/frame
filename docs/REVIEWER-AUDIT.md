@@ -1,5 +1,7 @@
 # Bounty requirement audit
 
+For the latest code changes, see [the accepted-project comparison](COMPARISON.md). FRAME now prepares SDXL during `npm start`, checks only its six actual SDK calls, and includes a browser recording. The checklist below records earlier review context; its references to checking five requested exports have been superseded. No new submission or X post has been made by this revision.
+
 This checks the requirements in the user-provided `REQ.txt` against observable code and the public repository. The organizer did not give us a specific rejection explanation, so the likely problems below are hypotheses, not a claimed rejection verdict.
 
 | Requirement | Evidence and current state |
@@ -18,7 +20,7 @@ This checks the requirements in the user-provided `REQ.txt` against observable c
 
 ## Improvements made for the resubmission
 
-The old app forced monochrome through its prompt, negative prompt, and PNG conversion. Those paths now preserve QVAC's natural-color output. A tested SDXL model replaces SD 2.1 for better product and location concepts. A shot title, crew notes, practical brief templates, reproducible seed, saved gallery, and printable crew board give a small production team something it can actually use. Setup resumes interrupted model downloads. `npm test` now starts with SDK export verification after `npm install`, while `doctor`, `smoke`, and the browser test verify progressively more of the real runtime. `completion` and `textToSpeech` are checked for compatibility only; FRAME's inference calls are `diffusion` and `upscale`.
+The old app forced monochrome through its prompt, negative prompt, and PNG conversion. Those paths now preserve QVAC's natural-color output. A tested SDXL model replaces SD 2.1 for better product and location concepts. A shot title, crew notes, practical brief templates, reproducible seed, saved gallery, and printable crew board give a small production team something it can actually use. Setup resumes interrupted model downloads. `npm test` starts with SDK export verification after `npm install`, while `doctor`, `smoke`, and the browser test verify progressively more of the real runtime. The current check covers `loadModel`, `diffusion`, `upscale`, `unloadModel`, `heartbeat`, and `close`; completion and speech are not FRAME features.
 
 ## Suggested Whop description
 

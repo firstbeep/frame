@@ -10,6 +10,7 @@
     "npm": ">=10.9.0"
   },
   "scripts": {
+    "prestart": "node scripts/setup.js --render-only",
     "start": "node src/server.js",
     "verify": "node scripts/verify-sdk.mjs",
     "doctor": "node scripts/doctor.js",

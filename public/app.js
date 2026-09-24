@@ -131,9 +131,18 @@ $('project').oninput = () => { try { localStorage.setItem('frame-project',$('pro
 $('random').onclick = () => { $('seed').value = crypto.getRandomValues(new Uint32Array(1))[0] % 2147483648; };
 try { const saved = JSON.parse(localStorage.getItem('frame-draft')); if (saved) draft(saved); $('project').value = localStorage.getItem('frame-project') || 'My next shoot'; } catch {}
 $('prompt').oninput();
-try {
-  const state = await api('/api/status'); ready = state.modelsReady; upscaleReady = state.upscaleReady;
-  if (!ready) { $('setup').textContent = `MODEL SETUP / SDXL COLOR UPGRADE\n${state.modelError}\nNew SDXL weights are 3.94 GB; the optional upscaler adds 67 MB. Refresh this page when setup finishes. Existing saved frames are kept.`; $('setup').hidden = false; }
-  await gallery(); controls();
-  if (state.active) follow(state.active);
-} catch (e) { error(e.message); }
+async function refreshReadiness() {
+  const state = await api('/api/status');
+  ready = state.modelsReady; upscaleReady = state.upscaleReady;
+  $('setup').hidden = ready;
+  if (!ready) $('setup').textContent = `MODEL SETUP\n${state.modelError}\nSDXL is 3.94 GB. This page will enable rendering automatically when setup finishes.`;
+  $('upscale-setup').hidden = !ready || upscaleReady;
+  $('upscale').title = upscaleReady ? 'Enlarge an original frame by 4×' : 'Run npm run setup to install the optional 67 MB upscaler';
+  controls();
+  if (state.active && !busy) follow(state.active);
+}
+try { await refreshReadiness(); await gallery(); } catch (e) { error(e.message); }
+// Detect completed setup without discarding the user's current shot brief.
+setInterval(() => {
+  if (!ready || !upscaleReady) refreshReadiness().catch(() => {});
+}, 3000);

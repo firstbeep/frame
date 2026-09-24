@@ -6,6 +6,7 @@
 <main>
   <section class="intro"><div><div class="eyebrow">LESS GUESSWORK. A BETTER SHOOT.</div><h1>Plan the shot.<br><em>Bring it to life.</em></h1></div><p>Preview a product setup or scout a scene.<br>Explore natural color, light, and composition.<br>Send your crew a visual plan before shoot day.</p></section>
   <div id="setup" class="notice" hidden></div>
+  <p id="upscale-setup" class="fine-print" hidden>Optional 4× upscaling is not installed. Run <code>npm run setup</code> in a second terminal to add it. Rendering and board export are available without it.</p>
   <section class="workspace">
     <form id="scene-form" class="director">
       <div class="section-label"><span>01 / DIRECTION</span><span class="tiny">YOUR NEXT SHOT</span></div>
@@ -20,7 +21,7 @@
       <div class="two-col"><div><label for="format">Frame</label><select id="format"><option value="wide">Wide · 1152 × 768</option><option value="square">Square · 1024 × 1024</option><option value="portrait">Portrait · 768 × 1152</option></select></div><div><label for="steps">Detail / steps</label><select id="steps"><option value="20">Draft · 20</option><option value="28" selected>Standard · 28</option><option value="36">Fine · 36</option></select></div></div>
       <details class="notes-input"><summary>SHOT NOTES / for your crew</summary><label for="notes">Props, setup & action</label><textarea id="notes" maxlength="800" placeholder="Props: amber bottle, stone plinth, leaves. Light: window camera-left, white bounce right. Action: slow push-in. These notes go on your crew board, not into the image model."></textarea></details>
       <div class="seed-row"><label for="seed">Seed <span> / repeat a composition</span></label><input type="number" id="seed" min="0" max="2147483647" value="42" required><button type="button" id="random" title="Choose a random seed" aria-label="Choose a random seed">↻</button></div>
-      <button type="submit" id="render" class="primary">Render scene <span>↗</span></button>
+      <button type="submit" id="render" class="primary" disabled>Render scene <span>↗</span></button>
       <p class="fine-print">Local SDXL · Natural color · Concept visualization<br>Rendering can take a minute or more on a laptop.</p>
     </form>
     <div class="viewer">
